@@ -1,0 +1,29 @@
+FROM python:3.11-slim-bookworm
+
+COPY --from=builder /opt/spark /opt/spark
+
+RUN apt update && \
+    DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
+    procps \
+    openjdk-17-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV SPARK_MODE="worker"
+ENV SPARK_HOME="/opt/spark"
+ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
+ENV SPARK_MASTER_URL="spark://spark-master:7077"
+# executa o spark em foreground
+ENV SPARK_NO_DEMONIZE=true
+ENV PYSPARK_PYTHON="/usr/local/bin/python3"
+ENV PYSPARK_DRIVER_PYTHON="/usr/local/bin/python3"
+
+RUN groupadd --system --gid 1000 spark && \
+    useradd --system --uid 1000 --gid spark sparkuser && \
+    chown -R sparkuser:spark "${SPARK_HOME}"
+
+USER sparkuser
+WORKDIR "${SPARK_HOME}"
+
+ENTRYPOINT ["/opt/spark/sbin/start-worker.sh"]
+
+CMD ["${SPARK_MASTER_URL}"]
