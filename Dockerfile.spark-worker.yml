@@ -13,7 +13,7 @@ ENV SPARK_HOME="/opt/spark"
 ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
 ENV SPARK_MASTER_URL="spark://spark-master:7077"
 # executa o spark em foreground
-ENV SPARK_NO_DEMONIZE=true
+ENV SPARK_NO_DAEMONIZE=true
 ENV PYSPARK_PYTHON="/usr/local/bin/python3"
 ENV PYSPARK_DRIVER_PYTHON="/usr/local/bin/python3"
 
@@ -26,4 +26,4 @@ WORKDIR "${SPARK_HOME}"
 
 ENTRYPOINT ["/opt/spark/sbin/start-worker.sh"]
 
-CMD ["${SPARK_MASTER_URL}"]
+CMD ["spark://spark-master:7077"]
