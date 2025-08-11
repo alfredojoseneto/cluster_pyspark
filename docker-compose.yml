@@ -1,0 +1,88 @@
+name: spark
+
+services:
+  spark-master:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark-master.yml
+    image: spark-master:latest
+    container_name: spark-master
+    restart: always
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    networks:
+      - spark-net
+    depends_on:
+      - minio
+
+  spark-worker-1:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark-worker.yml
+    image: spark-worker:latest
+    container_name: spark-worker-1
+    restart: always
+    environment:
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+    networks:
+      - spark-net
+    depends_on:
+      - spark-master
+      - minio
+
+  spark-worker-2:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark-worker.yml
+    image: spark-worker:latest
+    container_name: spark-worker-2
+    restart: always
+    environment:
+      - SPARK_WORKER_CORES=1
+      - SPARK_WORKER_MEMORY=1G
+    networks:
+      - spark-net
+    depends_on:
+      - spark-master
+      - minio
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":9001"
+    networks:
+      - spark-net
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "./minio_data:/data"
+
+  spark-client:
+    build:
+      context: .
+      dockerfile: Dockerfile.spark-client.yml
+    image: spark-client:latest
+    container_name: spark-client
+    restart: always
+    user: sparkuser
+    networks:
+      - spark-net
+    ports:
+      - "8888:8888"
+    volumes:
+      - "./notebooks:/home/sparkuser/notebooks"
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+      - minio
+
+networks:
+  spark-net:
