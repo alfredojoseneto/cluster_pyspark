@@ -30,6 +30,9 @@ $ mkdir minio_data
 # buildar o pyspark-builder --> necessário porque será a base das outras imagens
 $ docker build --tag builder:latest --file Dockerfile.spark-builder.yml .
 
+# build das demais imagems
+$ docker compose build
+
 # uma vez buildado a imagem do builder:latest
 $ docker compose up -d
 ```
