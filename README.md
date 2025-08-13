@@ -27,6 +27,9 @@ $ cd cluster_pyspark
 # criar o diretório para armazenar os dados do minio
 $ mkdir minio_data
 
+# ajustar permissão em diretórios --> ATENÇÃO: isso só se aplica em ambiente para estudo! Não fazer isso em produção
+$ chmod -R 777 minio_data notebooks
+
 # buildar o pyspark-builder --> necessário porque será a base das outras imagens
 $ docker build --tag builder:latest --file Dockerfile.spark-builder.yml .
 
